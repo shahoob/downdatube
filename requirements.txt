@@ -1,0 +1,5 @@
+progressbar2~=3.53.1
+pytube~=10.4.1
+pick~=1.0.0
+humanfriendly~=9.1
+click~=7.1.2
