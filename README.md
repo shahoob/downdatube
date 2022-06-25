@@ -1,17 +1,16 @@
-# `downdatube`
+# `downdatube`²
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/shahoob/downdatube?include_prereleases&label=%20&style=flat-square)
 ![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/shahoob/downdatube?logo=code-climate&style=flat-square)
-![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/shahoob/downdatube?logo=snyk&style=flat-square)
 ![Lines of code](https://img.shields.io/tokei/lines/github/shahoob/downdatube?style=flat-square)
-![managed by poetry](https://img.shields.io/badge/-managed_by_poetry-blue?logo=poetry&style=flat-square)
+[![managed by poetry](https://img.shields.io/badge/-managed_by_poetry-blue?logo=poetry&style=flat-square)](https://python-poetry.org/)
 
-Yet another YouTube™ downloader.
+Yet another YouTube downloader.
 
 ## Installation
 
-This project is being rewritten
+This project is being rewritten, will document installation _soon™_.
 
-## :warning: Disclaimer :warning:
+## :warning: Disclaimer
 
 This project is not affiliated by Google, nor YouTube themselves.
 
