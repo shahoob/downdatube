@@ -15,4 +15,5 @@ This project is being rewritten
 
 This project is not affiliated by Google, nor YouTube themselves.
 
-There is **no warranty** and is provided **as-is**. (the license mentions this)
+There is **no warranty** and is provided **as-is**, you may still redistribute this software.
+See the license (file named `LICENSE`) for details.
