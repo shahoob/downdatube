@@ -1,12 +1,12 @@
-import os
 import subprocess
+import tempfile
 import threading
 from typing import Optional, Tuple
 
 import pytube
 import typer
 from rich import print
-from rich.progress import DownloadColumn, Progress, SpinnerColumn, track
+from rich.progress import DownloadColumn, Progress, SpinnerColumn
 from rich.prompt import Confirm
 from typing_extensions import Annotated
 
@@ -62,51 +62,51 @@ def video(url: Annotated[str, typer.Argument(help="The URL of the video.")]):
 
         yt.register_on_progress_callback(dhandler)
 
-        paths = []
+        with tempfile.TemporaryDirectory() as tempdir:
+            paths = []
 
-        def download_streams():
-            paths.append(
-                streams[0].download(filename_prefix="v" if streams[1] else None)
-            )
-            if streams[1]:
-                paths.append(streams[1].download(filename_prefix="a"))
-            else:
-                paths.append(None)
+            def download_streams():
+                paths.append(
+                    streams[0].download(
+                        filename_prefix="v" if streams[1] else None, output_path=tempdir
+                    )
+                )
+                if streams[1]:
+                    paths.append(
+                        streams[1].download(filename_prefix="a", output_path=tempdir)
+                    )
+                else:
+                    paths.append(None)
 
-        dthread = threading.Thread(target=download_streams)
+            dthread = threading.Thread(target=download_streams)
+            dthread.start()
+            dthread.join()
 
-        dthread.start()
+            print(paths)
 
-        dthread.join()
+            encode_task = progress.add_task("Encoding...", total=None)
 
-        print(paths)
+            if paths[1]:
+                # trunk-ignore(bandit/B603)
+                # trunk-ignore(bandit/B607)
+                subprocess.run(
+                    [
+                        "ffmpeg",
+                        "-i",
+                        paths[0],
+                        "-i",
+                        paths[1],
+                        "-c:v",
+                        "copy",
+                        "-c:a",
+                        "aac",
+                        f"{yt.title}.mp4",
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
 
-        encode_task = progress.add_task("Encoding...", total=None)
-
-        if paths[1]:
-            # trunk-ignore(bandit/B603)
-            # trunk-ignore(bandit/B607)
-            subprocess.run(
-                [
-                    "ffmpeg",
-                    "-i",
-                    paths[0],
-                    "-i",
-                    paths[1],
-                    "-c:v",
-                    "copy",
-                    "-c:a",
-                    "aac",
-                    f"{yt.title}.mp4",
-                ],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-
-        progress.stop_task(encode_task)
-
-        for path in track(paths):
-            os.remove(path)
+            progress.stop_task(encode_task)
 
 
 @app.command()
