@@ -1,3 +1,4 @@
+import os
 import subprocess
 import threading
 from typing import Optional, Tuple
@@ -5,7 +6,7 @@ from typing import Optional, Tuple
 import pytube
 import typer
 from rich import print
-from rich.progress import DownloadColumn, Progress, SpinnerColumn
+from rich.progress import DownloadColumn, Progress, SpinnerColumn, track
 from rich.prompt import Confirm
 from typing_extensions import Annotated
 
@@ -92,15 +93,20 @@ def video(url: Annotated[str, typer.Argument(help="The URL of the video.")]):
                     paths[0],
                     "-i",
                     paths[1],
-                    "-c",
+                    "-c:v",
                     "copy",
+                    "-c:a",
+                    "aac",
                     f"{yt.title}.mp4",
                 ],
-                stdout = subprocess.DEVNULL,
-                stderr = subprocess.DEVNULL
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
             )
 
         progress.stop_task(encode_task)
+
+        for path in track(paths):
+            os.remove(path)
 
 
 @app.command()
