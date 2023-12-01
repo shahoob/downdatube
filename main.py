@@ -15,6 +15,16 @@ from core.select_streams import select_streams
 app = typer.Typer()
 
 
+def print_download_warning():
+    print(
+        "[yellow]Note[/]: When downloading sometimes the progress bar might be a bit janky,"
+    )
+    print(
+        "This is normal and as long as the spinner is spinning, everything should be fine."
+    )
+    print("I'll try to fix this sometime in the future.")
+
+
 @app.command()
 def video(url: Annotated[str, typer.Argument(help="The URL of the video.")]):
     """
@@ -22,6 +32,7 @@ def video(url: Annotated[str, typer.Argument(help="The URL of the video.")]):
     """
     # TODO: add error handling
     # TODO: add more options
+    # TODO: add support for captions
 
     yt = pytube.YouTube(url)
     streams: Tuple[pytube.Stream, Optional[pytube.Stream], Optional[pytube.Caption]]
@@ -38,31 +49,23 @@ def video(url: Annotated[str, typer.Argument(help="The URL of the video.")]):
     if not Confirm.ask("Do you want to download the video?", default=True):
         raise typer.Exit()
 
-    with Progress(
-        SpinnerColumn(),
-        *Progress.get_default_columns(),
-        DownloadColumn(),
-        transient=True,
-    ) as progress:
-        download_total_size = (
-            streams[0].filesize + streams[1].filesize if streams[1] is not None else 0
-        )
+    with tempfile.TemporaryDirectory() as tempdir:
+        with Progress(
+            *Progress.get_default_columns(),
+            DownloadColumn(),
+            transient=True,
+        ) as progress:
+            download_total_size = (
+                streams[0].filesize + streams[1].filesize if streams[1] is not None else 0
+            )
 
-        download_task = progress.add_task("Downloading...", total=download_total_size)
+            download_task = progress.add_task("Downloading...", total=download_total_size)
 
-        print(
-            "[orange][/orange]Note: When downloading sometimes the progress bar might be a bit janky,"
-        )
-        print(
-            "This is normal and as long as the spinner is spinning, everything should be fine."
-        )
+            def dhandler(stream: pytube.Stream, chunk: bytes, bytes_remaining: int):
+                progress.update(download_task, advance=len(chunk))
 
-        def dhandler(stream: pytube.Stream, chunk: bytes, bytes_remaining: int):
-            progress.update(download_task, advance=len(chunk))
+            yt.register_on_progress_callback(dhandler)
 
-        yt.register_on_progress_callback(dhandler)
-
-        with tempfile.TemporaryDirectory() as tempdir:
             paths = []
 
             def download_streams():
@@ -82,8 +85,7 @@ def video(url: Annotated[str, typer.Argument(help="The URL of the video.")]):
             dthread.start()
             dthread.join()
 
-            print(paths)
-
+        with Progress(transient=True) as progress:
             encode_task = progress.add_task("Encoding...", total=None)
 
             if paths[1]:
@@ -105,7 +107,6 @@ def video(url: Annotated[str, typer.Argument(help="The URL of the video.")]):
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
                 )
-
             progress.stop_task(encode_task)
 
 
