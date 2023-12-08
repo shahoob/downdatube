@@ -15,7 +15,7 @@ def select_streams(
     def no_audio_only(s: pytube.Stream):
         return s.resolution is not None
 
-    # convert the resolutions from strings to intergers so we can compare them easily
+    # convert the resolutions from strings to integers so we can compare them easily
     max_res = int(sorted(
         yt.streams.filter(
             custom_filter_functions=[no_audio_only]
