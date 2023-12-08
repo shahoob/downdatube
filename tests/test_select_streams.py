@@ -33,3 +33,20 @@ def test_max_res(video_2):
 
     streams = select_streams(yt, "144p")
     assert streams[0].resolution == "144p"
+
+@pytest.mark.parametrize(
+    "res,adaptive", [("144p", False), ("240p", False), ("360p", False), ("480p", False), ("720p", False), ("1080p", True), ("1440p", True), ("2160p", True)],
+)
+@pytest.mark.parametrize(
+    "video,expected", [(pytube.YouTube("https://www.youtube.com/watch?v=LXb3EKWsInQ"), True), (pytube.YouTube("https://www.youtube.com/watch?v=jNQXAC9IVRw"), False)]
+)
+def test_adaptive(res, adaptive, video, expected, request):
+    yt = video
+
+    streams = select_streams(yt, res)
+
+    if expected:
+        if adaptive:
+            assert streams[0].is_adaptive
+    else:
+        assert streams[1] is None
