@@ -8,7 +8,13 @@ Yet another YouTube™ downloader.
 
 ## Installation
 
-This project is being rewritten
+This project is being rewritten.
+
+If you're going to still install this, you're going to need `ffmpeg`.
+Just clone the repository, `poetry install` the dependencies,
+and `poetry run python main.py` with your options, try `poetry run python main.py --help`
+
+A proper installation instructions section will be made.
 
 ## :warning: Disclaimer :warning:
 
