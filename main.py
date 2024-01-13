@@ -71,7 +71,7 @@ def video(
             streams[0].filesize + streams[1].filesize if streams[1] is not None else 0
         )
 
-        def update_progress(event_type: Union[Literal["download"], Literal["encode"]], data: Any):
+        def update_progress(event_type: Literal["download", "encode"], data: Any):
             if event_type == "download":
                 progress.update(download_task, completed=(total_size - data[1]), total=total_size)
             if event_type == "encode":
