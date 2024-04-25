@@ -1,6 +1,6 @@
 import os
 import pathlib
-from typing import Any, Literal, Optional, Tuple, Union
+from typing import Any, Literal, Optional, Tuple
 
 import pytube
 import typer
@@ -80,8 +80,10 @@ def video(
                 if data == "start":
                     progress.start_task(encode_task)
                     progress.update(encode_task, visible=True, total=None)
-                if data == "end":
+                elif data == "end":
                     progress.stop_task(encode_task)
+                else:
+                    progress.update(encode_task, total=1, completed=data)
 
         print_download_warning()
         download_path = save_video(

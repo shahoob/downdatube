@@ -1,10 +1,12 @@
 import pathlib
 import shutil
-import subprocess
 import tempfile
 from typing import Any, Callable, Optional, Tuple
 
+from datetime import timedelta
+
 import pytube
+from ffmpeg import FFmpeg, Progress
 
 
 def save_video(
@@ -42,30 +44,35 @@ def save_video(
         if streams[1]:
             a_path = streams[1].download(output_path=tempdir, filename_prefix="a_")
 
-
         final_path = path / filename
 
         if streams[1]:
-            progress_callback("encode", "start")
 
-            subprocess.run(
-                [
-                    "ffmpeg",
-                    "-i",
-                    v_path,
-                    "-i",
-                    a_path,
-                    "-c:v",
-                    "copy",
-                    "-c:a",
-                    "aac",
-                    final_path,
-                ],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+            encode = (
+                FFmpeg()
+                .option("y")
+                .input(v_path)
+                .input(a_path)
+                .output(final_path, {"c:v": "copy", "c:a": "aac"})
             )
 
-            progress_callback("encode", "end")
+            @encode.listens_to("start")
+            def onStart(args):
+                progress_callback("encode", "start")
+                print(args)
+
+            @encode.listens_to("progress")
+            def onProgress(progress: Progress):
+                progress_callback("encode", progress.time/timedelta(seconds=yt.length))
+
+            @encode.listens_to("completed")
+            def onEnd():
+                progress_callback("encode", "end")
+
+            encode.execute()
         else:
             shutil.move(v_path, final_path)
     return final_path
+
+
+
