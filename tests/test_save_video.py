@@ -22,7 +22,7 @@ def test_adaptive(res, video_1, tmp_path):
 
     streams = select_streams(yt, res)
 
-    final_path = save_video(streams, yt, tmp_path)
+    final_path = save_video(streams=streams, yt=yt, path=tmp_path)
 
     assert final_path is not None
     assert final_path.exists()

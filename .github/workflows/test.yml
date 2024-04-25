@@ -40,6 +40,12 @@ jobs:
         sudo apt update
         sudo apt install ffmpeg -y
         poetry install
-    - name: Test with pytest
-      run: |
-        poetry run pytest
+    - name: Test with pytest and coverage
+      run: poetry run coverage run -m pytest
+    - name: Export coverage
+      run: poetry run coverage xml
+    - name: Run codacy-coverage-reporter
+      uses: codacy/codacy-coverage-reporter-action@v1
+      with:
+        project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        coverage-reports: ./coverage.xml
