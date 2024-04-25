@@ -31,7 +31,7 @@ def save_video(
         )
 
         if not filename:
-            filename = streams[0].default_filename
+            filename = f"{pytube.helpers.safe_filename(yt.title)}.mp4"
 
         def dhandler(stream: pytube.Stream, chunk: bytes, bytes_remaining: int):
             global download_remaining_size
