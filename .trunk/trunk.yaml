@@ -17,6 +17,7 @@ runtimes:
 # This is the section where you manage your linters. (https://docs.trunk.io/check/configuration)
 lint:
   enabled:
+    - actionlint@1.6.27
     - checkov@3.2.74
     - trivy@0.50.4
     - yamllint@1.35.1
