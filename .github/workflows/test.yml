@@ -36,7 +36,10 @@ jobs:
         path: .venv
         key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
     - name: Install dependencies
-      run: poetry install
+      run: |
+        sudo apt update
+        sudo apt install ffmpeg -y
+        poetry install
     - name: Test with pytest
       run: |
         poetry run pytest
