@@ -1,7 +1,8 @@
 # `downdatube`<sup>2</sup>
 
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/shahoob/downdatube?include_prereleases&label=%20&style=flat-square)
-[![managed by poetry](https://img.shields.io/badge/-managed_by_poetry-blue?logo=poetry&style=flat-square)](https://python-poetry.org/)
+[![managed by poetry](https://img.shields.io/badge/managed_by_poetry-blue?style=flat-square&logo=poetry&logoColor=white
+)](https://python-poetry.org/)
 
 Yet another YouTube™ downloader.
 
