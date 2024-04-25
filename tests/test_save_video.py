@@ -2,8 +2,8 @@
 import pytest
 import pytube
 
-from core.save_video import save_video
-from core.select_streams import select_streams
+from downdatube.core.save_video import save_video
+from downdatube.core.select_streams import select_streams
 
 
 @pytest.fixture()

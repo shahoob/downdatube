@@ -2,7 +2,7 @@
 import pytest
 import pytube
 
-from core.select_streams import select_streams
+from downdatube.core.select_streams import select_streams
 
 
 @pytest.fixture()

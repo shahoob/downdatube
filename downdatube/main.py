@@ -5,12 +5,13 @@ from typing import Any, Literal, Optional, Tuple
 import pytube
 import typer
 from rich import print
-from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.prompt import Confirm
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
 from typing_extensions import Annotated
 
-from core.save_video import save_video
-from core.select_streams import select_streams
+from .core.save_video import save_video
+from .core.select_streams import select_streams
+
+from questionary import confirm
 
 app = typer.Typer()
 
@@ -51,14 +52,14 @@ def video(
     ) as progress:
         progress.add_task("Getting info...", total=None)
         streams = select_streams(yt, "1080p")
-        print(f"[cyan]Video selected[/]: {yt.title}")
+        print(f"[cyan]Video selected[/]: [link {yt.watch_url}]{yt.title}[/]")
         total_size = (
             streams[0].filesize + streams[1].filesize if streams[1] is not None else 0
         )
         print(f"[cyan]Size[/]: {total_size / 1024 / 1024:.2f} MB")
 
     if not yes:
-        if not Confirm.ask("Do you want to download the video?", default=True):
+        if not confirm("Do you want to download the video?").ask():
             raise typer.Exit()
 
     with Progress(
@@ -78,8 +79,10 @@ def video(
                 )
             if event_type == "encode":
                 if data == "start":
+                    progress.stop_task(download_task)
+                    progress.update(download_task, visible=False)
                     progress.start_task(encode_task)
-                    progress.update(encode_task, visible=True, total=None)
+                    progress.update(encode_task, visible=True, total=1)
                 elif data == "end":
                     progress.stop_task(encode_task)
                 else:
@@ -90,16 +93,44 @@ def video(
             streams, yt, pathlib.Path(os.getcwd()), progress_callback=update_progress
         )
 
-    print(f'[cyan]Downloaded to[/] "{download_path}"')
-
+    print(f'[green]Downloaded to[/] "{download_path}"!')
 
 @app.command()
-def playlist(url: Annotated[str, typer.Argument(help="The URL of the playlist.")]):
+def playlist(
+    url: Annotated[str, typer.Argument(help="The URL of the playlist.")],
+):
     """
     Downloads a playlist's videos. Probably self explanatory.
     """
     # TODO: implement this
-    pass
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(25),
+        transient=True,
+    ) as progress:
+        playlist_info_fetch_task = progress.add_task('Getting playlist info...', total=None)
+        playlist = pytube.Playlist(url)
+
+        plural = 's' if playlist.length > 0 else ''
+
+        print(f'[cyan]Got [/][grey88]{playlist.title}"[/], which has {playlist.length} video{plural}')
+        progress.stop_task(playlist_info_fetch_task)
+        progress.update(playlist_info_fetch_task, visible=False)
+        video_info_fetch_task = progress.add_task("Getting video info...", total=playlist.length)
+
+        for video in progress.track(sequence=playlist.videos, task_id=video_info_fetch_task):
+            video.check_availability()
+            # print(f"[cyan]Video available[/]: [link {video.watch_url}]{video.title}[/]")
+            def no_audio_only(s: pytube.Stream):
+                    return s.resolution is not None    # convert the resolutions from strings to integers so we can compare them easily
+            max_res = int(sorted(
+                video.streams.filter(
+                    custom_filter_functions=[no_audio_only]
+                ), key=lambda s: int(s.resolution[:-1]), reverse=True
+            )[0].resolution[:-1])
+
+            # print(f"Highest resolution is {max_res}p")
 
 
 if __name__ == "__main__":
