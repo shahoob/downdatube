@@ -1,6 +1,6 @@
-import pathlib
-from typing import Any, Literal, Optional, Tuple, Union
 import os
+import pathlib
+from typing import Any, Literal, Optional, Tuple
 
 import pytube
 import typer
@@ -9,8 +9,8 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.prompt import Confirm
 from typing_extensions import Annotated
 
-from core.select_streams import select_streams
 from core.save_video import save_video
+from core.select_streams import select_streams
 
 app = typer.Typer()
 
@@ -28,7 +28,9 @@ def print_download_warning():
 @app.command()
 def video(
     url: Annotated[str, typer.Argument(help="The URL of the video.")],
-    yes: Annotated[bool, typer.Option("-y", help="Answer all prompts with their default options.")] = False,
+    yes: Annotated[
+        bool, typer.Option("-y", help="Answer all prompts with their default options.")
+    ] = False,
 ):
     """
     Downloads a video. Self explanatory.
@@ -60,9 +62,7 @@ def video(
             raise typer.Exit()
 
     with Progress(
-        SpinnerColumn(),
-        *Progress.get_default_columns(),
-        transient=True
+        SpinnerColumn(), *Progress.get_default_columns(), transient=True
     ) as progress:
         download_task = progress.add_task("Downloading...")
         encode_task = progress.add_task("Encoding...", visible=False, start=False)
@@ -73,18 +73,25 @@ def video(
 
         def update_progress(event_type: Literal["download", "encode"], data: Any):
             if event_type == "download":
-                progress.update(download_task, completed=(total_size - data[1]), total=total_size)
+                progress.update(
+                    download_task, completed=(total_size - data[1]), total=total_size
+                )
             if event_type == "encode":
                 if data == "start":
                     progress.start_task(encode_task)
                     progress.update(encode_task, visible=True, total=None)
-                if data == "end":
+                elif data == "end":
                     progress.stop_task(encode_task)
+                else:
+                    progress.update(encode_task, total=1, completed=data)
 
         print_download_warning()
-        download_path = save_video(streams, yt, pathlib.Path(os.getcwd()), progress_callback=update_progress)
+        download_path = save_video(
+            streams, yt, pathlib.Path(os.getcwd()), progress_callback=update_progress
+        )
 
-    print(f"[cyan]Downloaded to[/] \"{download_path}\"")
+    print(f'[cyan]Downloaded to[/] "{download_path}"')
+
 
 @app.command()
 def playlist(url: Annotated[str, typer.Argument(help="The URL of the playlist.")]):
