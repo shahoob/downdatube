@@ -4,6 +4,7 @@ version = "2.0.0"
 description = "Yet another YouTube™ downloader."
 authors = ["Shehab Ali Tweel <shehabtweel@gmail.com>"]
 license = "GPL-3.0-or-later"
+exclude = ["downdatube/**/*test_*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
