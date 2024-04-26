@@ -133,5 +133,5 @@ def playlist(
             # print(f"Highest resolution is {max_res}p")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     app()
