@@ -23,6 +23,7 @@ coverage = "^7.3.2"
 
 [tool.coverage.run]
 source = ["downdatube"]
+omit = ["test_*.py"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
